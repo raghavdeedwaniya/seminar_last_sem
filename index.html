@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthPulse AI — Real-Time Public Health Intelligence Dashboard</title>
+  <meta name="description" content="AI/NLP-Powered Real-Time Public Health Intelligence System — Raghav Deedwaniya, LPU">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background effects -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow g1"></div>
+  <div class="bg-glow g2"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <span>HealthPulse<b>AI</b></span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-view="dashboard" id="nav-dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-btn" data-view="trends" id="nav-trends">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Trends
+      </button>
+      <button class="nav-btn" data-view="sentiment" id="nav-sentiment">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        Sentiment
+      </button>
+      <button class="nav-btn" data-view="topics" id="nav-topics">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Topics
+      </button>
+      <button class="nav-btn" data-view="alerts" id="nav-alerts">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Alerts
+        <span class="nav-badge" id="alertCount">3</span>
+      </button>
+      <button class="nav-btn" data-view="map" id="nav-map">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+        Geo Map
+      </button>
+      <button class="nav-btn" data-view="about" id="nav-about">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        About
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-status">
+        <span class="status-dot live"></span>
+        System Online
+      </div>
+      <div class="sidebar-version">v2.1 • April 2026</div>
+    </div>
+  </aside>
+
+  <!-- Mobile Header -->
+  <header class="mobile-header" id="mobileHeader">
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="mobile-title">HealthPulse<b>AI</b></span>
+    <span class="mobile-live"><span class="status-dot live"></span>Live</span>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main" id="main">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
+        <span class="topbar-time" id="topbarTime"></span>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search topics, trends..." id="searchInput">
+        </div>
+        <button class="topbar-btn" id="refreshBtn" title="Refresh Data">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: DASHBOARD ===== -->
+    <div class="view active" id="view-dashboard">
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="kpi-info">
+            <div class="kpi-value" id="kpiTopics">12</div>
+            <div class="kpi-label">Active Topics</div>
+          </div>
+          <div class="kpi-trend up">+3 today</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+          <div class="kpi-info">
+            <div class="kpi-value" id="kpiDocuments">48.2K</div>
+            <div class="kpi-label">Documents Processed</div>
+          </div>
+          <div class="kpi-trend up">+2.1K/hr</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <div class="kpi-info">
+            <div class="kpi-value" id="kpiAlerts">3</div>
+            <div class="kpi-label">Active Anomalies</div>
+          </div>
+          <div class="kpi-trend warn">1 critical</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg></div>
+          <div class="kpi-info">
+            <div class="kpi-value" id="kpiSentiment">62%</div>
+            <div class="kpi-label">Positive Sentiment</div>
+          </div>
+          <div class="kpi-trend down">-4% shift</div>
+        </div>
+      </div>
+      <!-- Charts Row -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h2>Health Topic Trends (24h)</h2><span class="badge-live">● Live</span></div>
+          <canvas id="mainTrendChart"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Sentiment Distribution</h2><span class="badge-auto">Auto-refresh</span></div>
+          <canvas id="mainSentimentChart"></canvas>
+        </div>
+      </div>
+      <!-- Bottom Row -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h2>Top Detected Topics</h2></div>
+          <div class="topic-list" id="dashTopics"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Recent Anomaly Alerts</h2></div>
+          <div class="alert-list" id="dashAlerts"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: TRENDS ===== -->
+    <div class="view" id="view-trends">
+      <div class="panel full-panel">
+        <div class="panel-head">
+          <h2>Multi-Source Trend Analysis</h2>
+          <div class="panel-controls">
+            <select id="trendRange" class="ctrl-select"><option value="24">24 Hours</option><option value="72">3 Days</option><option value="168">7 Days</option><option value="720">30 Days</option></select>
+          </div>
+        </div>
+        <canvas id="detailTrendChart" height="300"></canvas>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h2>Data Source Volume</h2></div>
+          <canvas id="sourceChart"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Trend Velocity (Rate of Change)</h2></div>
+          <canvas id="velocityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: SENTIMENT ===== -->
+    <div class="view" id="view-sentiment">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h2>Sentiment Over Time</h2></div>
+          <canvas id="sentimentTimeChart" height="260"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Sentiment by Topic</h2></div>
+          <canvas id="sentimentTopicChart" height="260"></canvas>
+        </div>
+      </div>
+      <div class="panel full-panel">
+        <div class="panel-head"><h2>Live Sentiment Feed</h2><span class="badge-live">● Streaming</span></div>
+        <div class="feed-list" id="sentimentFeed"></div>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: TOPICS ===== -->
+    <div class="view" id="view-topics">
+      <div class="panel full-panel">
+        <div class="panel-head"><h2>Discovered Topics — LDA Topic Modeling</h2></div>
+        <div class="topic-cards-grid" id="topicCards"></div>
+      </div>
+      <div class="panel full-panel">
+        <div class="panel-head"><h2>Topic Coherence Scores</h2></div>
+        <canvas id="coherenceChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: ALERTS ===== -->
+    <div class="view" id="view-alerts">
+      <div class="panel full-panel">
+        <div class="panel-head"><h2>Anomaly Detection — Z-Score + Isolation Forest</h2>
+          <div class="panel-controls">
+            <select id="alertFilter" class="ctrl-select"><option value="all">All Levels</option><option value="critical">Critical</option><option value="warning">Warning</option><option value="info">Info</option></select>
+          </div>
+        </div>
+        <div class="alert-full-list" id="fullAlerts"></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h2>Anomaly Score Timeline</h2></div>
+          <canvas id="anomalyTimelineChart" height="220"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Detection Method Breakdown</h2></div>
+          <canvas id="detectionMethodChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: MAP ===== -->
+    <div class="view" id="view-map">
+      <div class="panel full-panel map-panel">
+        <div class="panel-head"><h2>Geographic Health Signal Distribution</h2></div>
+        <div id="geoMap" style="height:500px;border-radius:10px;"></div>
+      </div>
+      <div class="panel full-panel">
+        <div class="panel-head"><h2>Regional Breakdown</h2></div>
+        <canvas id="regionChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: ABOUT ===== -->
+    <div class="view" id="view-about">
+      <div class="panel full-panel about-panel">
+        <div class="about-header">
+          <div class="about-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h2>Health Trend Analysis Dashboard</h2>
+          <p class="about-sub">AI/NLP-Powered Real-Time Public Health Intelligence System</p>
+        </div>
+        <div class="about-grid">
+          <div class="about-card">
+            <h3>Author</h3>
+            <p><strong>Raghav Deedwaniya</strong></p>
+            <p>Reg No: 12220019</p>
+            <p>Section: 322SJ • Roll No: 76</p>
+          </div>
+          <div class="about-card">
+            <h3>Institution</h3>
+            <p><strong>Lovely Professional University</strong></p>
+            <p>Department of Computer Science & Engineering</p>
+            <p>April 2026</p>
+          </div>
+          <div class="about-card">
+            <h3>Domain</h3>
+            <p>Public Health Informatics</p>
+            <p>AI / NLP / Data Analytics</p>
+            <p>Real-Time Surveillance</p>
+          </div>
+          <div class="about-card">
+            <h3>Tech Stack</h3>
+            <div class="about-tags">
+              <span>Kafka</span><span>Python</span><span>SpaCy</span><span>LDA</span><span>RoBERTa</span><span>React</span><span>D3.js</span><span>AWS</span><span>Cassandra</span><span>Elasticsearch</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-section">
+          <h3>System Architecture</h3>
+          <div class="arch-pipeline">
+            <div class="arch-step"><span>01</span>Data Ingestion<small>Kafka, APIs</small></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-step"><span>02</span>Preprocessing<small>SpaCy, NER</small></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-step"><span>03</span>NLP Analysis<small>LDA, RoBERTa</small></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-step"><span>04</span>Anomaly Detection<small>Z-Score, IF</small></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-step"><span>05</span>Dashboard<small>React, D3</small></div>
+          </div>
+        </div>
+        <div class="about-section">
+          <h3>Key References</h3>
+          <ul class="ref-list">
+            <li>Eysenbach (2009) — Infodemiology & Infoveillance</li>
+            <li>Ginsberg et al. (2009) — Search query flu prediction, <em>Nature</em></li>
+            <li>Blei et al. (2003) — Latent Dirichlet Allocation, <em>JMLR</em></li>
+            <li>Liu (2012) — Sentiment Analysis & Opinion Mining</li>
+            <li>Grootendorst (2022) — BERTopic neural topic modeling</li>
+            <li>WHO (2023) — Digital Health & Innovation</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- CDN Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
